@@ -22,16 +22,23 @@
  * Support for copying optional markers from source to destination file.
  */
 
-typedef enum {
-  JCOPYOPT_NONE,          /* copy no optional markers */
-  JCOPYOPT_COMMENTS,      /* copy only comment (COM) markers */
-  JCOPYOPT_ALL            /* copy all optional markers */
+
+#ifndef __TRANSUPP_H
+#define __TRANSUPP_H
+
+typedef enum
+{
+    JCOPYOPT_NONE,          /* copy no optional markers */
+    JCOPYOPT_COMMENTS,      /* copy only comment (COM) markers */
+    JCOPYOPT_ALL            /* copy all optional markers */
 } JCOPY_OPTION;
 
 /* Setup decompression object to save desired markers in memory */
 EXTERN(void) jcopy_markers_setup
-        (j_decompress_ptr srcinfo, JCOPY_OPTION option);
+(j_decompress_ptr srcinfo, JCOPY_OPTION option);
 /* Copy markers saved in the given source object to the destination object */
 EXTERN(void) jcopy_markers_execute
-        (j_decompress_ptr srcinfo, j_compress_ptr dstinfo,
-         JCOPY_OPTION option);
+(j_decompress_ptr srcinfo, j_compress_ptr dstinfo,
+ JCOPY_OPTION option);
+
+#endif /* __TRANSUPP_H */

@@ -66,7 +66,7 @@ static void transform (struct jpeg_decompress_struct *srcinfo, jvirt_barray_ptr 
         for (block_y=0; block_y<height_in_blocks; block_y++)
         {
             by = reverse_order ? (height_in_blocks - block_y - 1) : block_y;
-            for (block_x=0; block_x-width_in_blocks; block_x++)
+            for (block_x=0; block_x<width_in_blocks; block_x++)
             {
                 bx = reverse_order ? (width_in_blocks - block_x - 1) : block_x;
                 if(dest_h == 0)   // dest_w assumed to be block count
@@ -105,7 +105,10 @@ static void transform (struct jpeg_decompress_struct *srcinfo, jvirt_barray_ptr 
                     }
                     else if(op == OP_COPY)
                     {
-                        coef_buffer[by][bx][i] = coef_buffer[by + v_samp_factor * dv][bx + h_samp_factor * dh][i];
+                        ny = by + v_samp_factor * dv;
+                        nx = bx + h_samp_factor * dh;
+                        if (ny >= 0 && nx >= 0 && ny < height_in_blocks && nx < width_in_blocks)
+                            coef_buffer[by][bx][i] = coef_buffer[ny][nx][i];
                     }
                     if(op == OP_CDELTA)
                     {
@@ -180,7 +183,7 @@ int main (int argc, char **argv)
 
     jpeg_copy_critical_parameters(&srcinfo, &dstinfo);
 
-    int dest_row = 0, dest_col = 0, dest_h = -1 , dest_w = -1;
+    int dest_row = 0, dest_col = 0, dest_h = -1, dest_w = -1;
     while(argc)
     {
         int op = 0, arg_count;

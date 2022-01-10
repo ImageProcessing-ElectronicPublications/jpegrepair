@@ -1,10 +1,10 @@
-.TH "jpegrepair" 1 "06 Oct 2021" "0.20211006" "User Manual"
+.TH "jpegrepair" 1 "10 Jan 2022" "0.20220110" "User Manual"
 
 .SH NAME
 jpegrepair
 
 .SH SYNOPSIS
-\fBjpegrepair\fR [options] infile OP ...
+\fBjpegrepair\fR infile outfile [options]
 
 .SH DESCRIPTION
 Repair jpeg images, by the following operations.
@@ -14,9 +14,6 @@ Repair jpeg images, by the following operations.
  - Copy relative blocks
 
 .SH OPTIONS
-.TP
-\fBoutfile\fR
-Name outfile
 .TP
 \fBcdelta\fR n N
 Luminance
@@ -46,6 +43,10 @@ Insert 2 blocks at position 50:5
 .TP
 Delete 1 block at position 63:54, and after that, correct luminance. Delete 1 block at position 112:0.
 \fBjpegrepair\fR corrupt.jpg fixed.jpg dest 63 54 delete 1 cdelta 0 -450 dest 112 0 delete 1
+.TP
+Copy to position 9:35 2x2 blocks from relative block 1:-20 (1 row forward, 20 columns back).
+\fBjpegprepair\fR before.jpg after.jpg dest 9 35 2 2 copy 1 -20
+
 
 .SH COPYRIGHT
  Copyright (c) 2017, Don Mahurin

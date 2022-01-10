@@ -20,6 +20,7 @@ Copyright (c) 2017, Don Mahurin
 #include <jpeglib.h>
 #include "transupp.h"
 
+#define JPEGREPAIR_VERSION "0.20220110"
 #define OP_CDELTA 1
 #define OP_COPY 2
 #define OP_INSERT 3
@@ -71,11 +72,11 @@ static void transform (struct jpeg_decompress_struct *srcinfo, jvirt_barray_ptr 
                 bx = reverse_order ? (width_in_blocks - block_x - 1) : block_x;
                 if(dest_h == 0)   // dest_w assumed to be block count
                 {
-                    if((by / v_samp_factor * width_in_blocks + bx ) / h_samp_factor < ( dest_row * width_in_blocks / h_samp_factor + dest_col)  ||
-                            dest_w > 0 &&
-                            (by / v_samp_factor * width_in_blocks + bx ) / h_samp_factor > dest_w + ( dest_row * width_in_blocks / h_samp_factor + dest_col)) continue;
+                    if((((by / v_samp_factor * width_in_blocks + bx) / h_samp_factor) < (dest_row * width_in_blocks / h_samp_factor + dest_col)) ||
+                            ((dest_w > 0) &&
+                            (((by / v_samp_factor * width_in_blocks + bx ) / h_samp_factor) > (dest_w + ( dest_row * width_in_blocks / h_samp_factor + dest_col))))) continue;
                 }
-                else if(by/v_samp_factor < dest_row || (dest_h > 0 && by/v_samp_factor >= (dest_row + dest_h)) || bx/h_samp_factor < dest_col || (dest_w > 0 && bx/h_samp_factor >= (dest_col + dest_w)) ) continue;
+                else if(by/v_samp_factor < dest_row || (dest_h > 0 && by/v_samp_factor >= (dest_row + dest_h)) || bx/h_samp_factor < dest_col || (dest_w > 0 && bx/h_samp_factor >= (dest_col + dest_w))) continue;
 
                 for (i=0; i<DCTSIZE2; i++)
                 {
@@ -134,13 +135,13 @@ int main (int argc, char **argv)
 
     if (argc < 3)
     {
-        fprintf(stderr, "%s version 0.20211006\n", argv[0]);
+        fprintf(stderr, "%s version %s\n", argv[0], JPEGREPAIR_VERSION);
         fprintf(stderr, "Usage:\n");
-        fprintf(stderr, "%s infile OP ...\n", argv[0]);
+        fprintf(stderr, "%s infile outfile OP ...\n", argv[0]);
         fprintf(stderr, "where OP is:\n");
-        fprintf(stderr, "outfile cdelta dest insert delete copy\n");
+        fprintf(stderr, "cdelta dest insert delete copy\n");
         fprintf(stderr, "Example:\n");
-        fprintf(stderr, "Reduce luminance.\n");
+        fprintf(stderr, "Increase luminance.\n");
         fprintf(stderr, "%s dark.jpg light.jpg cdelta 0 100\n", argv[0]);
         fprintf(stderr, "Fix blueish image.\n");
         fprintf(stderr, "%s blueish.jpg fixed.jpg cdelta 1 -100\n", argv[0]);
@@ -148,6 +149,8 @@ int main (int argc, char **argv)
         fprintf(stderr, "%s before.jpg after.jpg dest 50 5 insert 2\n", argv[0]);
         fprintf(stderr, "Delete 1 block at position 63:54, and after that, correct luminance. Delete 1 block at position 112:0.\n");
         fprintf(stderr, "%s corrupt.jpg fixed.jpg dest 63 54 delete 1 cdelta 0 -450 dest 112 0 delete 1\n", argv[0]);
+        fprintf(stderr, "Copy to position 9:35 2x2 blocks from relative block 1:-20 (1 row forward, 20 columns back).\n");
+        fprintf(stderr, "%s before.jpg after.jpg  dest 9 35 2 2 copy 1 -20\n", argv[0]);
         exit(1);
     }
 
@@ -206,12 +209,12 @@ int main (int argc, char **argv)
             dest_col = atoi(*argv);
             argc--;
             argv++;
-            if(argc > 1 && (isdigit(argv[0][0]) || argv[0][0] == '-' && isdigit(argv[0][1])))
+            if((argc > 1) && (isdigit(argv[0][0]) || ((argv[0][0] == '-') && isdigit(argv[0][1]))))
             {
                 dest_h = atoi(*argv);
                 argc--;
                 argv++;
-                if(argc > 1 && isdigit(argv[0][0]) || argv[0][0] == '-' && isdigit(argv[0][1]))
+                if((argc > 1) && (isdigit(argv[0][0]) || ((argv[0][0] == '-') && isdigit(argv[0][1]))))
                 {
                     dest_w = atoi(*argv);
                     argc--;

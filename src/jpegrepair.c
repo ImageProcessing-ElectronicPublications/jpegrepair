@@ -25,6 +25,7 @@ Copyright (c) 2017, Don Mahurin
 #define OP_COPY 2
 #define OP_INSERT 3
 #define OP_DELETE 4
+#define OP_GRAYSCALE 5
 
 static void transform (struct jpeg_decompress_struct *srcinfo, jvirt_barray_ptr *coef_arrays, int dest_row, int dest_col, int dest_h, int dest_w, int op, int arg_count, char **args)
 {
@@ -139,7 +140,7 @@ int main (int argc, char **argv)
         fprintf(stderr, "Usage:\n");
         fprintf(stderr, "%s infile outfile OP ...\n", argv[0]);
         fprintf(stderr, "where OP is:\n");
-        fprintf(stderr, "cdelta dest insert delete copy\n");
+        fprintf(stderr, "cdelta dest insert delete copy Y Cb Cr\n");
         fprintf(stderr, "Example:\n");
         fprintf(stderr, "Increase luminance.\n");
         fprintf(stderr, "%s dark.jpg light.jpg cdelta 0 100\n", argv[0]);
@@ -151,6 +152,14 @@ int main (int argc, char **argv)
         fprintf(stderr, "%s corrupt.jpg fixed.jpg dest 63 54 delete 1 cdelta 0 -450 dest 112 0 delete 1\n", argv[0]);
         fprintf(stderr, "Copy to position 9:35 2x2 blocks from relative block 1:-20 (1 row forward, 20 columns back).\n");
         fprintf(stderr, "%s before.jpg after.jpg  dest 9 35 2 2 copy 1 -20\n", argv[0]);
+        fprintf(stderr, "To apply grayscale preview on the Y channel (luminance):\n");
+        fprintf(stderr, "%s input.jpg output.jpg Y\n", argv[0]);
+        fprintf(stderr, "To apply grayscale preview on the Cb channel (chrominance blue):\n");
+        fprintf(stderr, "%s input.jpg output.jpg Cb\n", argv[0]);
+        fprintf(stderr, "To apply grayscale preview on the Cr channel (chrominance red):\n");
+        fprintf(stderr, "%s input.jpg output.jpg Cr\n", argv[0]);
+        fprintf(stderr, "To apply grayscale preview on the Y channel and also perform a color delta operation:\n");
+        fprintf(stderr, "%s input.jpg output.jpg Y cdelta 0 100\n", argv[0]);
         exit(1);
     }
 
@@ -279,6 +288,11 @@ int main (int argc, char **argv)
                 fprintf(stderr, "delete args: N\n");
                 break;
             }
+            arg_count = 1;
+        }
+        else if(!strcmp(*argv, "Y") || !strcmp(*argv, "Cb") || !strcmp(*argv, "Cr"))
+        {
+            op = OP_GRAYSCALE;
             arg_count = 1;
         }
         else
